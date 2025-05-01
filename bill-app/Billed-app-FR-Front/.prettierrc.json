@@ -1,0 +1,7 @@
+{
+  "//": "Définit la largeur maximale des lignes avant un retour à la ligne automatique",
+  "printWidth": 120,
+
+  "//": "Ignore la sensibilité aux espaces dans HTML (évite les mises en forme inattendues)",
+  "htmlWhitespaceSensitivity": "ignore"
+}

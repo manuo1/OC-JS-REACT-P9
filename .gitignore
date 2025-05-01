@@ -1,0 +1,17 @@
+# ========== Config  ==========
+/.vscode/
+/.prettierrc.json
+/eslint.config.mjs
+
+# ========== Node Project ========== 
+# Dépendances
+node_modules/
+
+# Fichiers de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers générés
+dist/
+build/
