@@ -8,7 +8,10 @@ import { bills } from "../fixtures/bills.js";
 import { ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import Bills from "../containers/Bills.js";
+import mockStore from "../__mocks__/store";
 import router from "../app/Router.js";
+
+jest.mock("../app/Store", () => mockStore);
 
 /**
  * Test suite for the Bills page when user is authenticated as an Employee
@@ -68,7 +71,7 @@ describe("Given I am connected as an employee", () => {
       const billsInstance = new Bills({
         document,
         onNavigate,
-        store: null,
+        store: mockStore,
         localStorage: window.localStorage,
       });
 
@@ -91,7 +94,7 @@ describe("Given I am connected as an employee", () => {
       const billsInstance = new Bills({
         document,
         onNavigate: jest.fn(),
-        store: null,
+        store: mockStore,
         localStorage: window.localStorage,
       });
 
@@ -123,6 +126,84 @@ describe("Given I am connected as an employee", () => {
 
       expect(billsData[0]).toHaveProperty("date");
       expect(billsData[0]).toHaveProperty("status");
+    });
+  });
+});
+
+/**
+ * Test suite for the Bills page when user is authenticated as an Employee
+ */
+describe("Given I am connected as an employee", () => {
+  describe("When I navigate to Bills", () => {
+    /**
+     * Test case: fetches bills from mock API GET
+     * Ensures that bills are correctly fetched and displayed
+     */
+    test("fetches bills from mock API GET", async () => {
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      window.localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.append(root);
+      router();
+      window.onNavigate(ROUTES_PATH.Bills);
+      // Wait for the DOM to update and check that all items are displayed
+      await waitFor(() => screen.getByText("Mes notes de frais"));
+      expect(screen.getByText("encore")).toBeTruthy();
+      expect(screen.getByText("test1")).toBeTruthy();
+      expect(screen.getByText("test2")).toBeTruthy();
+      expect(screen.getByText("test3")).toBeTruthy();
+    });
+    /**
+     * Test group for error handling during API calls
+     */
+    describe("When an error occurs on API", () => {
+      beforeEach(() => {
+        jest.spyOn(mockStore, "bills");
+
+        Object.defineProperty(window, "localStorage", { value: localStorageMock });
+        window.localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+
+        const root = document.createElement("div");
+        root.setAttribute("id", "root");
+        document.body.append(root);
+        router();
+      });
+
+      /**
+       * Test case: fetches bills from an API and fails with 404 message error
+       * Verifies that the application displays the correct error message
+       */
+      test("fetches bills from an API and fails with 404 message error", async () => {
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            list: () => Promise.reject(new Error("Erreur 404")),
+          };
+        });
+
+        window.onNavigate(ROUTES_PATH.Bills);
+        // Wait for the next tick to ensure DOM is updated
+        await new Promise(process.nextTick);
+
+        const message = screen.getByText(/Erreur 404/);
+        expect(message).toBeTruthy();
+      });
+      /**
+       * Test case: fetches bills from an API and fails with 500 message error
+       * Verifies that the application displays the correct error message
+       */
+      test("fetches bills from an API and fails with 404 message error", async () => {
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            list: () => Promise.reject(new Error("Erreur 500")),
+          };
+        });
+        window.onNavigate(ROUTES_PATH.Bills);
+        // Wait for the next tick to ensure DOM is updated
+        await new Promise(process.nextTick);
+        const message = screen.getByText(/Erreur 500/);
+        expect(message).toBeTruthy();
+      });
     });
   });
 });
