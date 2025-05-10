@@ -131,7 +131,7 @@ describe("Given I am connected as an employee", () => {
 });
 
 /**
- * Test suite for the Bills page when user is authenticated as an Employee
+ * Test suite for the Bills page : GET
  */
 describe("Given I am connected as an employee", () => {
   describe("When I navigate to Bills", () => {
